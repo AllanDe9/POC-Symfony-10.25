@@ -11,11 +11,13 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Scheduler\Attribute\AsCronTask;
 
 #[AsCommand(
     name: 'app:send-newsletter',
     description: 'Envoie la newsletter aux utilisateurs inscrits avec les jeux à venir.',
 )]
+#[AsCronTask('30 8 * * 1')]
 class EmailCommand extends Command
 {
     private UserRepository $userRepository;
@@ -37,10 +39,8 @@ class EmailCommand extends Command
 
         $games = $this->videoGameRepository->createQueryBuilder('v')
             ->where('v.releaseDate BETWEEN :today AND :nextWeek')
-            ->setParameters([
-                'today' => $today,  
-                'nextWeek' => $nextWeek,
-            ])
+            ->setParameter('today', $today)
+            ->setParameter('nextWeek', $nextWeek)
             ->orderBy('v.releaseDate', 'ASC')
             ->getQuery()
             ->getResult();
@@ -50,7 +50,7 @@ class EmailCommand extends Command
             return Command::SUCCESS;
         }
 
-        $users = $this->userRepository->findBy(['newsletter' => true]);
+        $users = $this->userRepository->findBy(['subscriptionToNewsletter' => true]);
 
         if (empty($users)) {
             $output->writeln('Aucun utilisateur inscrit à la newsletter.');

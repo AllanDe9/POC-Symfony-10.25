@@ -2,17 +2,13 @@
 
 <p>Bonjour,</p>
 
-{% if games is not empty %}
-    <p>Voici les jeux à venir dans les 7 prochains jours :</p>
-    <ul>
-        {% for game in games %}
-            <li>
-                <strong>{{ game.title }}</strong> – sortie le {{ game.releaseDate|date('d/m/Y') }}
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Aucun nouveau jeu cette semaine.</p>
-{% endif %}
+<p>Voici les jeux à venir dans les 7 prochains jours :</p>
+<ul>
+    {% for game in games %}
+        <li>
+            <strong>{{ game.title }}</strong> – sortie le {{ game.releaseDate|date('d/m/Y') }}
+        </li>
+    {% endfor %}
+</ul>
 
 <p>Bonne semaine et bons jeux</p>

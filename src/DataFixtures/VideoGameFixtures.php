@@ -23,10 +23,10 @@ class VideoGameFixtures extends Fixture
                 'description' => 'Un jeu d\'action-aventure historique développé par Ubisoft.'
             ],
             [
-                'title' => 'FIFA 25',
+                'title' => 'FIFA 26',
                 'editor_ref' => EditorFixtures::EDITOR_REFERENCE . '1', // Electronic Arts
                 'category_ref' => CategoryFixtures::CATEGORY_REFERENCE . '0', // Action
-                'releaseDate' => '2025-09-29',
+                'releaseDate' => '2025-10-22',
                 'description' => 'Le dernier opus de la célèbre franchise de football.'
             ],
             [

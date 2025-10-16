@@ -45,6 +45,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private ?string $password = null;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $subscriptionToNewsletter = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -58,6 +61,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function isSubscribedToNewsletter(): bool
+    {
+        return $this->subscriptionToNewsletter;
+    }
+
+    public function setSubscriptionToNewsletter(bool $subscriptionToNewsletter): static
+    {
+        $this->subscriptionToNewsletter = $subscriptionToNewsletter;
 
         return $this;
     }
