@@ -15,10 +15,43 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use OpenApi\Attributes as OA;
 
 final class CategoryController extends AbstractController
 {
     #[Route('/api/v1/category/list', name: 'categories', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/v1/category/list',
+        summary: 'Liste toutes les catégories',
+        tags: ['Catégories']
+    )]
+    #[OA\Parameter(
+        name: 'page',
+        in: 'query',
+        description: 'Numéro de la page',
+        required: false,
+        schema: new OA\Schema(type: 'integer', default: 1)
+    )]
+    #[OA\Parameter(
+        name: 'limit',
+        in: 'query',
+        description: 'Nombre d\'éléments par page',
+        required: false,
+        schema: new OA\Schema(type: 'integer', default: 3)
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Liste des catégories récupérée avec succès',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(
+                properties: [
+                    new OA\Property(property: 'id', type: 'integer', example: 1),
+                    new OA\Property(property: 'name', type: 'string', example: 'Action')
+                ]
+            )
+        )
+    )]
     public function getCategories(Request $request, CategoryRepository $categoryRepository): JsonResponse
     {
         $page = $request->get('page', 1);
@@ -30,12 +63,71 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('/api/v1/category/{id}', name: 'category', requirements: ['id' => Requirement::DIGITS], methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/v1/category/{id}',
+        summary: 'Récupère une catégorie par son ID',
+        tags: ['Catégories']
+    )]
+    #[OA\Parameter(
+        name: 'id',
+        in: 'path',
+        description: 'ID de la catégorie',
+        required: true,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Catégorie récupérée avec succès',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'id', type: 'integer', example: 1),
+                new OA\Property(property: 'name', type: 'string', example: 'Action')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Catégorie non trouvée'
+    )]
     public function getCategory(Category $category): JsonResponse
     {
         return $this->json($category, Response::HTTP_OK, [], ['groups' => 'category:read']);
     }
 
     #[Route('/api/v1/category/add', name: 'category_add', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/v1/category/add',
+        summary: 'Crée une nouvelle catégorie',
+        security: [['Bearer' => []]],
+        tags: ['Catégories']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['name'],
+            properties: [
+                new OA\Property(property: 'name', type: 'string', example: 'RPG', minLength: 2, maxLength: 100)
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Catégorie créée avec succès',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'id', type: 'integer', example: 1),
+                new OA\Property(property: 'name', type: 'string', example: 'RPG')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Données invalides'
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Accès refusé - ROLE_ADMIN requis'
+    )]
     public function addCategory(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
@@ -59,6 +151,48 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('/api/v1/category/{id}', name: 'category_update', requirements: ['id' => Requirement::DIGITS], methods: ['PUT'])]
+    #[OA\Put(
+        path: '/api/v1/category/{id}',
+        summary: 'Met à jour une catégorie existante',
+        security: [['Bearer' => []]],
+        tags: ['Catégories']
+    )]
+    #[OA\Parameter(
+        name: 'id',
+        in: 'path',
+        description: 'ID de la catégorie',
+        required: true,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'name', type: 'string', example: 'RPG', minLength: 2, maxLength: 100)
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Catégorie mise à jour avec succès',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'status', type: 'string', example: 'success')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Données invalides'
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Accès refusé - ROLE_ADMIN requis'
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Catégorie non trouvée'
+    )]
     public function updateCategory(Request $request, Category $currentCategory, SerializerInterface $serializer, EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
@@ -82,6 +216,36 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('/api/v1/category/{id}', name: 'category_delete', requirements: ['id' => Requirement::DIGITS], methods: ['DELETE'])]
+    #[OA\Delete(
+        path: '/api/v1/category/{id}',
+        summary: 'Supprime une catégorie',
+        security: [['Bearer' => []]],
+        tags: ['Catégories']
+    )]
+    #[OA\Parameter(
+        name: 'id',
+        in: 'path',
+        description: 'ID de la catégorie',
+        required: true,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Catégorie supprimée avec succès',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'status', type: 'string', example: 'success')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Accès refusé - ROLE_ADMIN requis'
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Catégorie non trouvée'
+    )]
     public function deleteCategory(Category $category, EntityManagerInterface $entityManager): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {

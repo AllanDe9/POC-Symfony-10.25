@@ -1,0 +1,51 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Video Games API
+            description: API REST pour la gestion de jeux vidéo, catégories et éditeurs
+            version: 1.0.0
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+                    description: "Entrez votre token JWT (obtenu via /api/login_check)"
+        security:
+            - Bearer: []
+        paths:
+            /api/login_check:
+                post:
+                    tags:
+                        - Authentification
+                    summary: Authentification utilisateur
+                    description: Obtenir un token JWT pour l'authentification
+                    requestBody:
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        username:
+                                            type: string
+                                            example: user@example.com
+                                        password:
+                                            type: string
+                                            example: password123
+                    responses:
+                        '200':
+                            description: Token JWT retourné avec succès
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token:
+                                                type: string
+                                                example: eyJ0eXAiOiJKV1QiLCJhbGc...
+                        '401':
+                            description: Identifiants invalides
+    areas:
+        path_patterns:
+            - ^/api(?!/doc)
